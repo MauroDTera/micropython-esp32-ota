@@ -70,8 +70,10 @@ def partition_table() -> list[tuple[int, int, int, int, str, bool]]:
 
 def partition_table_print() -> None:
     ptype = {Partition.TYPE_APP: "app", Partition.TYPE_DATA: "data"}
+    d = {0: "factory"}
+    d.update({i: f"ota_{i-OTA_MIN}" for i in range(OTA_MIN, OTA_MAX)})
     subtype = [
-        {0: "factory"} | {i: f"ota_{i-OTA_MIN}" for i in range(OTA_MIN, OTA_MAX)},
+        d,
         {0: "ota", 1: "phy", 2: "nvs", 129: "fat"},  # DATA subtypes
     ]
     print("Partition table:")
@@ -121,7 +123,14 @@ def otadata_check() -> None:
 
 # Print a detailed summary of the OTA status of the device
 def status() -> None:
-    upyversion, pname = sys.version.split(" ")[2], current_ota.info()[4]
+    vers_parts = sys.version.split(" ")
+    if len(vers_parts)>=3:
+        upyversion = vers_parts[2]
+    else:
+        vers_t = sys.implementation[1]
+        vers_t_s = tuple(map(lambda a: str(a), vers_t))
+        upyversion = '.'.join(vers_t_s)
+    pname = current_ota.info()[4]
     print(f"Micropython {upyversion} has booted from partition '{pname}'.")
     print(f"Will boot from partition '{boot_ota().info()[4]}' on next reboot.")
     if not ota_partitions():

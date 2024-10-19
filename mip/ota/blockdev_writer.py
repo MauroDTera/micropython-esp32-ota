@@ -6,6 +6,7 @@
 
 import hashlib
 import io
+import binascii
 
 from micropython import const
 
@@ -66,7 +67,12 @@ def sha_file(f, buffersize=4096) -> str:
     read_sha = hashlib.sha256()
     while (n := f.readinto(mv)) > 0:
         read_sha.update(mv[:n])
-    return read_sha.digest().hex()
+    dig = read_sha.digest()
+    try:
+        sha_hex = dig.hex()
+    except:
+        sha_hex = binascii.hexlify(dig)
+    return sha_hex
 
 
 # BlockdevWriter provides a convenient interface to writing images to any block
@@ -137,7 +143,11 @@ class BlockDevWriter:
         nbytes: int = self.device.end
         if self.length and self.length != nbytes:
             raise ValueError(f"Received {nbytes} bytes (expect {self.length}).")
-        write_sha = self._sha.digest().hex()
+        dig = self._sha.digest()
+        try:
+            write_sha = dig.hex()
+        except:
+            write_sha = binascii.hexlify(dig)
         if not self.sha:
             self.sha = write_sha
         if self.sha != write_sha:
