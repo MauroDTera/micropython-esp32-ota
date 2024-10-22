@@ -150,7 +150,7 @@ class BlockDevWriter:
             write_sha = binascii.hexlify(dig)
         if not self.sha:
             self.sha = write_sha
-        if self.sha != write_sha:
+        elif self.sha != write_sha:
             raise ValueError(f"SHA mismatch recv={write_sha} expect={self.sha}.")
         if self.verify:
             if self.verbose:
